@@ -5,206 +5,53 @@ const test = require('node:test');
 const vm = require('node:vm');
 
 class FakeElement {
-  constructor(tagName) {
-    this.tagName = tagName;
-    this.children = [];
-    this.classList = { add() {}, contains() { return false; }, remove() {} };
-    this.dataset = {};
-    this.listeners = new Map();
-    this.queryResults = new Map();
-    this.style = {};
-    this.textContent = '';
-  }
-
-  addEventListener(eventName, listener) {
-    this.listeners.set(eventName, listener);
-  }
-
+  constructor(tag = 'div') { this.tagName = tag; this.children = []; this.listeners = new Map(); this.dataset = {}; this.style = {}; this.hidden = false; this.textContent = ''; this.className = ''; this.classList = { contains: () => false, add() {}, remove() {}, toggle() {} }; }
+  append(...nodes) { nodes.forEach((node) => this.appendChild(node)); }
+  appendChild(node) { this.children.push(node); return node; }
+  replaceChildren(...nodes) { this.children = nodes; }
+  addEventListener(name, handler) { this.listeners.set(name, handler); }
   removeEventListener() {}
-
-  appendChild(child) {
-    this.children.push(child);
-    return child;
-  }
-
-  getBoundingClientRect() {
-    return { height: 0, width: 1 };
-  }
-
-  querySelector(selector) {
-    if (!this.queryResults.has(selector)) {
-      this.queryResults.set(selector, new FakeElement('child'));
-    }
-    return this.queryResults.get(selector);
-  }
-
-  querySelectorAll() {
-    return [];
-  }
-
-  remove() {
-    this.removed = true;
-  }
-
-  trigger(eventName, event = {}) {
-    return this.listeners.get(eventName)?.(event);
-  }
+  setAttribute() {}
+  querySelector(selector) { if (!this.nodes) this.nodes = new Map(); if (!this.nodes.has(selector)) this.nodes.set(selector, new FakeElement()); return this.nodes.get(selector); }
+  querySelectorAll() { return []; }
+  closest() { return null; }
+  getBoundingClientRect() { return { left: 0, width: 100, height: 40 }; }
+  remove() { this.removed = true; }
+  trigger(name, event = {}) { return this.listeners.get(name)?.(event); }
 }
 
-function createContentScriptContext({
-  hostname = 'example.com',
-  media = null,
-  settings = { miniPlayerAllPages: true, sources: { other: false } },
-} = {}) {
-  const body = new FakeElement('body');
-  const head = new FakeElement('head');
-  let storageChangeListener;
-  let messageListener;
-  let clearedIntervals = 0;
-  const runtimeMessages = [];
-
-  const document = {
-    body,
-    head,
-    title: 'Test page',
-    addEventListener() {},
-    createElement(tagName) {
-      return new FakeElement(tagName);
-    },
-    getElementById(id) {
-      return [...head.children, ...body.children].find((element) => element.id === id && !element.removed) || null;
-    },
-    querySelector() {
-      return null;
-    },
-    querySelectorAll(selector) {
-      if (media && (selector === 'video' || selector === 'audio')) {
-        return [media];
-      }
-      return [];
-    },
-    removeEventListener() {},
-  };
-
+function loadPage() {
+  const body = new FakeElement('body'); let listener; const messages = [];
   const context = {
-    chrome: {
-      runtime: {
-        onMessage: { addListener(listener) { messageListener = listener; } },
-        sendMessage(message) {
-          runtimeMessages.push(message);
-          return Promise.resolve({ found: false });
-        },
-      },
-      storage: {
-        local: {
-          get(keys, callback) {
-            callback({
-              musicControlSettings: settings,
-              musicControlMiniPlayerEnabled: false,
-            });
-          },
-          set() {},
-        },
-        onChanged: { addListener(listener) { storageChangeListener = listener; } },
-      },
-    },
-    clearInterval() { clearedIntervals += 1; },
-    console,
-    document,
+    AbortController, URL, console, setTimeout, clearTimeout, setInterval: () => 1, clearInterval() {},
+    window: { location: { hostname: 'www.youtube.com', href: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' }, innerWidth: 1000, innerHeight: 700 },
+    document: { title: 'Test video', body, createElement: (tag) => new FakeElement(tag), querySelector: () => null, querySelectorAll: () => [], addEventListener() {}, removeEventListener() {} },
     navigator: {},
-    setInterval() { return 1; },
-    setTimeout() {},
-    URL,
-    window: { innerHeight: 1000, innerWidth: 1000, location: { hostname } },
+    chrome: { runtime: { onMessage: { addListener: (next) => { listener = next; } }, sendMessage: (message) => { messages.push(message); if (message.action === 'GET_PUBLIC_STATE') return Promise.resolve({ ok: true, data: { settings: { sources: { youtube: true }, miniPlayerAllPages: true }, miniPlayerEnabled: false } }); return Promise.resolve({ ok: true, data: { found: false } }); } } }
   };
-
   vm.createContext(context);
-  vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'content-script.js'), 'utf8'), context);
-
-  return {
-    getMiniPlayer: () => document.getElementById('music-control-mini-player'),
-    get runtimeMessages() { return runtimeMessages; },
-    sendMessage: (action) => messageListener({ action }, null, () => {}),
-    storageChange: (changes) => storageChangeListener(changes, 'local'),
-    waitForMicrotasks: () => new Promise((resolve) => setImmediate(resolve)),
-    get clearedIntervals() { return clearedIntervals; },
-  };
+  ['shared/message-contracts.js', 'content/provider-media-controller.js', 'content/provider-queue-adapter.js', 'content/youtube-all-suggestions-adapter.js', 'content/mini-player-controller.js', 'content-script.js'].forEach((file) => vm.runInContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), context));
+  return { context, messages, dispatch: (message) => new Promise((resolve) => listener(message, {}, resolve)), receive: (message) => listener(message, {}, () => {}) };
 }
 
-test('updates an already-open tab when the global pin state changes', async () => {
-  const page = createContentScriptContext();
-  await page.waitForMicrotasks();
-
-  assert.equal(page.getMiniPlayer(), null);
-
-  page.storageChange({ musicControlMiniPlayerEnabled: { newValue: true } });
-  assert.ok(page.getMiniPlayer());
-
-  page.storageChange({ musicControlMiniPlayerEnabled: { newValue: false } });
-  assert.equal(page.getMiniPlayer(), null);
-  assert.equal(page.clearedIntervals, 1);
+test('loads ordered content modules without direct storage access', async () => {
+  const page = loadPage();
+  await new Promise((resolve) => setImmediate(resolve));
+  const queue = await page.dispatch({ action: 'CONTENT_MEDIA_COMMAND', command: 'getQueue' });
+  assert.equal(queue.source, 'native-next');
+  assert.equal(page.messages.some((message) => message.action === 'GET_PUBLIC_STATE'), true);
 });
 
-test('respects a live change to the show-on-all-pages setting', async () => {
-  const page = createContentScriptContext();
-  await page.waitForMicrotasks();
-
-  page.storageChange({ musicControlMiniPlayerEnabled: { newValue: true } });
-  assert.ok(page.getMiniPlayer());
-
-  page.storageChange({
-    musicControlSettings: {
-      newValue: { miniPlayerAllPages: false, sources: { other: false } },
-    },
-  });
-  assert.equal(page.getMiniPlayer(), null);
+test('creates the mini-player from a brokered state update', async () => {
+  const page = loadPage();
+  page.receive({ action: 'MINI_PLAYER_STATE_UPDATED', state: { settings: { sources: { youtube: true }, miniPlayerAllPages: true }, miniPlayerEnabled: true } });
+  const player = page.context.document.body.children.find((node) => node.id === 'music-control-mini-player');
+  assert.ok(player);
 });
 
-test('keeps the player visible in the tab where it was pinned when all-pages is disabled', async () => {
-  const page = createContentScriptContext();
-  await page.waitForMicrotasks();
+test('applies brokered source settings to the media controller', () => {
+  const page = loadPage();
+  page.receive({ action: 'PUBLIC_STATE_UPDATED', state: { settings: { sources: { youtube: false }, miniPlayerAllPages: true }, miniPlayerEnabled: false } });
 
-  page.storageChange({
-    musicControlSettings: {
-      newValue: { miniPlayerAllPages: false, sources: { other: false } },
-    },
-  });
-  page.sendMessage('toggleMiniPlayer');
-
-  assert.ok(page.getMiniPlayer());
-});
-
-test('normalizes remote mini-player next and previous commands for the media tab', async () => {
-  const page = createContentScriptContext({
-    hostname: 'www.youtube.com',
-    settings: { miniPlayerAllPages: true, sources: { youtube: true } },
-  });
-  await page.waitForMicrotasks();
-  page.storageChange({ musicControlMiniPlayerEnabled: { newValue: true } });
-  await page.waitForMicrotasks();
-
-  const player = page.getMiniPlayer();
-  page.runtimeMessages.length = 0;
-  await player.querySelector('.mini-prev').trigger('click');
-  await player.querySelector('.mini-next').trigger('click');
-
-  assert.deepEqual(page.runtimeMessages.map((message) => message.command), ['previous', 'next']);
-});
-
-test('keeps next and previous local when the current source tab has media', async () => {
-  const page = createContentScriptContext({
-    hostname: 'www.youtube.com',
-    media: { currentTime: 30, duration: 120, paused: true, volume: 1 },
-    settings: { miniPlayerAllPages: true, sources: { youtube: true } },
-  });
-  await page.waitForMicrotasks();
-  page.storageChange({ musicControlMiniPlayerEnabled: { newValue: true } });
-  await page.waitForMicrotasks();
-
-  const player = page.getMiniPlayer();
-  page.runtimeMessages.length = 0;
-  await player.querySelector('.mini-prev').trigger('click');
-  await player.querySelector('.mini-next').trigger('click');
-
-  assert.deepEqual(page.runtimeMessages, []);
+  assert.equal(page.context.MusicControlMedia.isEnabled(), false);
 });

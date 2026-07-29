@@ -25,7 +25,15 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content-script.js"],
+      "css": ["content/mini-player.css"],
+      "js": [
+        "shared/message-contracts.js",
+        "content/provider-media-controller.js",
+        "content/provider-queue-adapter.js",
+        "content/youtube-all-suggestions-adapter.js",
+        "content/mini-player-controller.js",
+        "content-script.js"
+      ],
       "run_at": "document_idle"
     }
   ]

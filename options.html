@@ -55,6 +55,33 @@
       </div>
     </section>
 
+    <fieldset class="settings-section credential-section">
+      <legend>YouTube Search API key</legend>
+      <p id="keyStatus" class="description" role="status" aria-live="polite">Not configured</p>
+      <ol class="credential-guide">
+        <li><a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noreferrer">Create or select a Google Cloud project</a>.</li>
+        <li><a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noreferrer">Enable YouTube Data API v3</a>.</li>
+        <li><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer">Create an API key</a>, then restrict it to YouTube Data API v3.</li>
+      </ol>
+      <label for="youtubeApiKey">API key</label>
+      <input id="youtubeApiKey" type="password" autocomplete="off" spellcheck="false" aria-describedby="keyStorageNote keyStatus">
+      <p id="keyStorageNote" class="description">Use for this session by default. It is cleared when Chrome or the extension restarts.</p>
+      <label class="persistence-choice"><input type="radio" name="keyPersistence" value="session" checked> Use for this session</label>
+      <label class="persistence-choice"><input type="radio" name="keyPersistence" value="local"> Remember on this device — not encrypted</label>
+      <p class="warning">Browser storage reduces accidental exposure; it is not a secret vault.</p>
+      <div class="button-row credential-actions"><button type="button" id="testKeyBtn" class="btn">Test key</button><button type="button" id="saveKeyBtn" class="btn btn-primary">Save API key</button><button type="button" id="forgetKeyBtn" class="btn danger">Forget key &amp; search data</button></div>
+    </fieldset>
+
+    <section class="settings-section experimental-section">
+      <h2>Experimental YouTube suggestions</h2>
+      <label class="experimental-toggle">
+        <input id="youtubeAllImportEnabled" type="checkbox" aria-describedby="youtubeAllImportHelp youtubeAllImportWarning">
+        <span>Show YouTube All suggestions in the popup</span>
+      </label>
+      <p id="youtubeAllImportHelp" class="description">Imports up to 20 visible videos from the active YouTube tab only. Disabled by default.</p>
+      <p id="youtubeAllImportWarning" class="warning">Experimental: YouTube page changes may make import unavailable. Suggestion data stays in this browser session.</p>
+    </section>
+
     <section class="settings-section">
       <h2>Mini Player</h2>
       <p class="description">Settings for the floating mini player.</p>
@@ -75,6 +102,8 @@
     </div>
   </div>
 
+  <script src="shared/message-contracts.js"></script>
+  <script src="options/options-api-key-controller.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

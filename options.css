@@ -157,3 +157,17 @@ header h1 {
 .status-msg.show {
   opacity: 1;
 }
+
+.credential-section { border: 0; }
+.credential-section legend { font-size: 16px; font-weight: 600; }
+.credential-guide { margin: -4px 0 14px 18px; color: #aaa; font-size: 12px; line-height: 1.5; }
+.credential-guide a { color: #ff9bab; }
+.credential-section input[type="password"] { width: 100%; margin: 8px 0; padding: 10px; border: 1px solid #444; border-radius: 6px; color: #fff; background: #ffffff0d; }
+.persistence-choice { display: block; margin: 8px 0; font-size: 13px; }
+.warning { color: #ffb4bf; font-size: 12px; }
+.credential-actions { flex-wrap: wrap; }
+.btn.danger { color: #ffb4bf; background: #e9456022; }
+.description.error { color: #ff9bab; }
+.experimental-toggle { display:flex; align-items:center; gap:10px; margin-bottom:10px; cursor:pointer; }
+.experimental-toggle input { width:18px; height:18px; accent-color:#e94560; }
+.experimental-toggle input:disabled + span { color:#777; }

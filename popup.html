@@ -5,74 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Music Control</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="popup/search.css">
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1>🎵 Music Control</h1>
-      <div class="tab-info" id="tabInfo"></div>
-    </header>
-
-    <section class="now-playing">
-      <div class="track-info">
-        <div class="track-title" id="trackTitle">No media detected</div>
-        <div class="track-artist" id="trackArtist"></div>
-      </div>
-      <div class="progress-container">
-        <span class="time" id="currentTime">0:00</span>
-        <div class="progress-bar" id="progressBar">
-          <div class="progress" id="progress"></div>
-        </div>
-        <span class="time" id="duration">0:00</span>
-      </div>
+  <main class="container">
+    <header class="header"><h1>Music Control</h1><div class="tab-info" id="tabInfo"></div></header>
+    <div class="popup-tabs" role="tablist" aria-label="Music Control views">
+      <button id="controlTab" role="tab" aria-selected="true" aria-controls="controlPanel">Control</button>
+      <button id="searchTab" role="tab" aria-selected="false" aria-controls="searchPanel" tabindex="-1">Search</button>
+    </div>
+    <section id="controlPanel" role="tabpanel" aria-labelledby="controlTab">
+      <section class="now-playing"><div class="track-title" id="trackTitle">No media detected</div><div class="track-artist" id="trackArtist"></div><div class="progress-container"><span id="currentTime">0:00</span><div class="progress-bar" id="progressBar" role="slider" tabindex="0" aria-label="Playback position" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00 of 0:00" aria-disabled="true"><span id="progress"></span></div><span id="duration">0:00</span></div></section>
+      <section class="controls"><div class="control-row"><button class="btn" id="prevBtn" aria-label="Previous track">⏮</button><button class="btn" id="backBtn" aria-label="Back 10 seconds">-10</button><button class="btn primary" id="playPauseBtn" aria-label="Play or pause"><span id="playPauseIcon">▶</span></button><button class="btn" id="forwardBtn" aria-label="Forward 10 seconds">+10</button><button class="btn" id="nextBtn" aria-label="Next track">⏭</button></div><div class="control-row volume"><label for="volumeSlider">Volume</label><input id="volumeSlider" type="range" min="0" max="100" value="100"><span id="volumeValue">100%</span></div><div class="control-row"><button class="btn wide" id="stopBtn">Stop</button><button class="btn wide" id="toggleMiniBtn">Pin player</button></div></section>
+      <section class="playlist-section"><div class="queue-heading"><h2 id="queueTitle">Playlist</h2><button id="importSuggestionsBtn" class="link-button" hidden>Import from YouTube All</button></div><p class="queue-helper" id="queueHelper"></p><p id="queueStatus" class="queue-status" role="status" aria-live="polite" aria-atomic="true"></p><div class="playlist" id="playlist"></div></section>
     </section>
-
-    <section class="controls">
-      <div class="control-row main-controls">
-        <button class="btn btn-secondary" id="prevBtn" title="Previous Track">
-          <span class="icon">⏮</span>
-        </button>
-        <button class="btn btn-secondary" id="backBtn" title="Back 10s">
-          <span class="icon">-10</span>
-        </button>
-        <button class="btn btn-primary" id="playPauseBtn" title="Play/Pause">
-          <span class="icon" id="playPauseIcon">▶</span>
-        </button>
-        <button class="btn btn-secondary" id="forwardBtn" title="Forward 10s">
-          <span class="icon">+10</span>
-        </button>
-        <button class="btn btn-secondary" id="nextBtn" title="Next Track">
-          <span class="icon">⏭</span>
-        </button>
-      </div>
-      <div class="control-row volume-control">
-        <span class="volume-icon" id="volumeIcon">🔊</span>
-        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100" />
-        <span class="volume-value" id="volumeValue">100%</span>
-      </div>
-      <div class="control-row">
-        <button class="btn btn-stop" id="stopBtn" title="Stop">
-          <span class="icon">⏹</span> Stop
-        </button>
-        <button class="btn btn-mini" id="toggleMiniBtn" title="Toggle Mini Player">
-          <span class="icon">📌</span> Pin Player
-        </button>
-      </div>
-    </section>
-
-    <section class="playlist-section">
-      <h2>Playlist</h2>
-      <div class="playlist" id="playlist">
-        <div class="playlist-empty">No playlist detected</div>
-      </div>
-    </section>
-
-    <footer class="status">
-      <span id="statusText">Ready</span>
-      <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
-    </footer>
-  </div>
-
-  <script src="popup.js"></script>
+    <section id="searchPanel" role="tabpanel" aria-labelledby="searchTab" hidden><form id="youtubeSearchForm"><label for="youtubeSearchQuery">Search YouTube</label><div class="search-row"><input id="youtubeSearchQuery" type="search" maxlength="160" autocomplete="off" spellcheck="false" placeholder="Song title or artist"><button type="submit" id="searchSubmit">Search</button></div></form><p class="search-note">Search runs only when submitted. Cached results may be reused for 24 hours.</p><div id="searchStatus" role="status" aria-live="polite"></div><div id="searchResults"></div><button id="clearSearchBtn" class="link-button">Clear search data</button></section>
+    <footer class="status"><span id="statusText">Ready</span><button id="settingsBtn" aria-label="Open settings">Settings</button></footer>
+  </main>
+  <script src="shared/message-contracts.js"></script><script src="popup/popup-dom.js"></script><script src="popup/progress-seek-controller.js"></script><script src="popup/popup-player-controller.js"></script><script src="popup/popup-search-controller.js"></script><script src="popup.js"></script>
 </body>
 </html>
