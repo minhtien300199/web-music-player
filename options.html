@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Control - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎵 Music Control Settings</h1>
+    </header>
+
+    <section class="settings-section">
+      <h2>Media Sources</h2>
+      <p class="description">Select which websites the extension should detect and control media from.</p>
+
+      <div class="source-list">
+        <label class="source-item">
+          <input type="checkbox" id="sourceYoutube" checked>
+          <span class="checkmark"></span>
+          <div class="source-info">
+            <span class="source-name">YouTube</span>
+            <span class="source-url">youtube.com</span>
+          </div>
+        </label>
+
+        <label class="source-item">
+          <input type="checkbox" id="sourceSpotify">
+          <span class="checkmark"></span>
+          <div class="source-info">
+            <span class="source-name">Spotify Web</span>
+            <span class="source-url">open.spotify.com</span>
+          </div>
+        </label>
+
+        <label class="source-item">
+          <input type="checkbox" id="sourceSoundcloud">
+          <span class="checkmark"></span>
+          <div class="source-info">
+            <span class="source-name">SoundCloud</span>
+            <span class="source-url">soundcloud.com</span>
+          </div>
+        </label>
+
+        <label class="source-item">
+          <input type="checkbox" id="sourceOther">
+          <span class="checkmark"></span>
+          <div class="source-info">
+            <span class="source-name">Other websites</span>
+            <span class="source-url">Any site with HTML5 audio/video</span>
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Mini Player</h2>
+      <p class="description">Settings for the floating mini player.</p>
+
+      <label class="source-item">
+        <input type="checkbox" id="miniPlayerAllPages" checked>
+        <span class="checkmark"></span>
+        <div class="source-info">
+          <span class="source-name">Show on all pages</span>
+          <span class="source-url">When enabled, mini player appears on every page</span>
+        </div>
+      </label>
+    </section>
+
+    <div class="button-row">
+      <button id="saveBtn" class="btn btn-primary">Save Settings</button>
+      <span id="statusMsg" class="status-msg"></span>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

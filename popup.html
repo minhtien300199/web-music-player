@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Control</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>🎵 Music Control</h1>
+      <div class="tab-info" id="tabInfo"></div>
+    </header>
+
+    <section class="now-playing">
+      <div class="track-info">
+        <div class="track-title" id="trackTitle">No media detected</div>
+        <div class="track-artist" id="trackArtist"></div>
+      </div>
+      <div class="progress-container">
+        <span class="time" id="currentTime">0:00</span>
+        <div class="progress-bar" id="progressBar">
+          <div class="progress" id="progress"></div>
+        </div>
+        <span class="time" id="duration">0:00</span>
+      </div>
+    </section>
+
+    <section class="controls">
+      <div class="control-row main-controls">
+        <button class="btn btn-secondary" id="prevBtn" title="Previous Track">
+          <span class="icon">⏮</span>
+        </button>
+        <button class="btn btn-secondary" id="backBtn" title="Back 10s">
+          <span class="icon">-10</span>
+        </button>
+        <button class="btn btn-primary" id="playPauseBtn" title="Play/Pause">
+          <span class="icon" id="playPauseIcon">▶</span>
+        </button>
+        <button class="btn btn-secondary" id="forwardBtn" title="Forward 10s">
+          <span class="icon">+10</span>
+        </button>
+        <button class="btn btn-secondary" id="nextBtn" title="Next Track">
+          <span class="icon">⏭</span>
+        </button>
+      </div>
+      <div class="control-row volume-control">
+        <span class="volume-icon" id="volumeIcon">🔊</span>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100" />
+        <span class="volume-value" id="volumeValue">100%</span>
+      </div>
+      <div class="control-row">
+        <button class="btn btn-stop" id="stopBtn" title="Stop">
+          <span class="icon">⏹</span> Stop
+        </button>
+        <button class="btn btn-mini" id="toggleMiniBtn" title="Toggle Mini Player">
+          <span class="icon">📌</span> Pin Player
+        </button>
+      </div>
+    </section>
+
+    <section class="playlist-section">
+      <h2>Playlist</h2>
+      <div class="playlist" id="playlist">
+        <div class="playlist-empty">No playlist detected</div>
+      </div>
+    </section>
+
+    <footer class="status">
+      <span id="statusText">Ready</span>
+      <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
