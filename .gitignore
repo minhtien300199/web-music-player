@@ -1,0 +1,21 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Dependencies and test output
+node_modules/
+coverage/
+
+# Logs and packaged extension artifacts
+*.log
+*.crx
+
+# Editor and operating-system files
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
